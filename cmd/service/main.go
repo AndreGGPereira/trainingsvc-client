@@ -28,7 +28,7 @@ func main() {
 		&cli.StringFlag{
 			Name:    "dbcs",
 			EnvVars: []string{"DBCS"},
-			Usage:   "admin:password@tcp(localhost:3306)/ms_training?parseTime=true",
+			Usage:   "mariadb connection string: user:password@tcp(host:port)/ms_training?parseTime=true",
 		},
 	}
 

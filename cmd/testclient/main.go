@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -136,8 +135,6 @@ func runTests(cl pb.ClientsServiceClient) error {
 	xclients, err = cl.GetClients(ctx, &pb.GetClientsRequest{
 		Ids: []string{bobidResp.Id},
 	})
-
-	fmt.Println(" Pega p clieten ", xclients)
 
 	if err != nil {
 		return cli.NewExitError(err.Error(), 13)

@@ -23,7 +23,7 @@ func New(ctx context.Context, sv *grpc.Server, config Config) error {
 	svc := &Service{}
 
 	// database connection
-	db, err := sqlx.Open("dbmaria", config.DBCS)
+	db, err := sqlx.Open("mysql", config.DBCS)
 	if err != nil {
 		return err
 	}
@@ -69,6 +69,7 @@ func (s *Service) NewClient(ctx context.Context, req *pb.NewClientRequest) (*pb.
 	if req.Score == 0 {
 		cols, vals = append(cols, "score"), append(vals, req.Score)
 	}
+
 	q, args, err := sq.Insert("clients").Columns(cols...).Values(vals...).ToSql()
 
 	if err != nil {
@@ -181,7 +182,6 @@ func (s *Service) NewMatch(ctx context.Context, req *pb.NewMatchRequest) (*pb.Ne
 
 	} else {
 		newMatchId, _ = insert.LastInsertId()
-
 	}
 
 	if _, err := tx.Exec("UPDATE clients SET score = score + ? WHERE id = ?", req.Score, req.ClientId); err != nil {
@@ -226,18 +226,17 @@ func (s *Service) Sort(ctx context.Context, req *pb.SortRequest) (*pb.SortRespon
 
 	strings := make(map[string]bool)
 	sortList := []string{}
-	sort.Strings(sortList)
 
-	if !req.RemoveDuplicates {
+	if req.RemoveDuplicates {
+		for _, entry := range req.Items {
+			if _, value := strings[entry]; !value {
+				strings[entry] = true
+				sortList = append(sortList, entry)
+			}
+		}
+		sort.Strings(sortList)
 		return &pb.SortResponse{Items: sortList}, nil
 	}
 
-	for _, entry := range req.Items {
-		if _, value := strings[entry]; !value {
-			strings[entry] = true
-			sortList = append(sortList, entry)
-		}
-	}
-
-	return &pb.SortResponse{Items: sortList}, nil
+	return &pb.SortResponse{Items: req.Items}, nil
 }
