@@ -21,7 +21,6 @@ message NewClientRequest {
   string name = 1;
   int64 birthday = 2; // unixnano
   int64 score = 3;
-  int64 created_at = 4;
 }
 
 message NewClientResponse { string id = 1; }

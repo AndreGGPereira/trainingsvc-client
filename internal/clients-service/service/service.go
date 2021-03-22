@@ -174,9 +174,14 @@ func (s *Service) NewMatch(ctx context.Context, req *pb.NewMatchRequest) (*pb.Ne
 
 	defer tx.Commit()
 
-	if _, err := tx.Exec("INSERT INTO client_matches (client_id, score) VALUES (?, ?)", req.ClientId, req.Score); err != nil {
+	var newMatchId int64
+	if insert, err := tx.Exec("INSERT INTO client_matches (client_id, score) VALUES (?, ?)", req.ClientId, req.Score); err != nil {
 		_ = tx.Rollback()
 		return nil, err
+
+	} else {
+		newMatchId, _ = insert.LastInsertId()
+
 	}
 
 	if _, err := tx.Exec("UPDATE clients SET score = score + ? WHERE id = ?", req.Score, req.ClientId); err != nil {
@@ -187,7 +192,7 @@ func (s *Service) NewMatch(ctx context.Context, req *pb.NewMatchRequest) (*pb.Ne
 	//FIXME: tx -> UPDATE clients SET score = score + ? WHERE id = ?
 	//tx.Rollback()
 	//TODO: remover esta linha
-	return &pb.NewMatchResponse{}, err
+	return &pb.NewMatchResponse{Id: newMatchId}, err
 }
 
 func (s *Service) DeleteClient(ctx context.Context, req *pb.DeleteClientRequest) (*pb.DeleteClientResponse, error) {
@@ -221,6 +226,11 @@ func (s *Service) Sort(ctx context.Context, req *pb.SortRequest) (*pb.SortRespon
 
 	strings := make(map[string]bool)
 	sortList := []string{}
+	sort.Strings(sortList)
+
+	if !req.RemoveDuplicates {
+		return &pb.SortResponse{Items: sortList}, nil
+	}
 
 	for _, entry := range req.Items {
 		if _, value := strings[entry]; !value {
@@ -229,6 +239,5 @@ func (s *Service) Sort(ctx context.Context, req *pb.SortRequest) (*pb.SortRespon
 		}
 	}
 
-	sort.Strings(sortList)
 	return &pb.SortResponse{Items: sortList}, nil
 }
