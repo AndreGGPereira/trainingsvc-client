@@ -23,7 +23,7 @@ func New(ctx context.Context, sv *grpc.Server, config Config) error {
 	svc := &Service{}
 
 	// database connection
-	db, err := sqlx.Open("mysql", config.DBCS)
+	db, err := sqlx.Open("dbmaria", config.DBCS)
 	if err != nil {
 		return err
 	}

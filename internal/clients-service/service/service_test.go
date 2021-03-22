@@ -39,20 +39,14 @@ func TestNewClient(t *testing.T) {
 
 func TestGetClients(t *testing.T) {
 
-		service, mock := newTestService(t)
+	service, mock := newTestService(t)
 
-		mock.ExpectQuery("SELECT id, name, birthday, score, created_at FROM `clients` WHERE id").
-			WillReturnRows(sqlmock.NewRows([]string{"id", "name", "birthday", "score", "created_at"}))
-		resp, err := service.GetClients(context.Background(), &pb.GetClientsRequest{
-			Ids: []string{" "},
-		})
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.NoError(t, mock.ExpectationsWereMet())
-	}
-
+	mock.ExpectQuery("SELECT id, name, birthday, score, created_at FROM `clients` WHERE id").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "birthday", "score", "created_at"}))
+	resp, err := service.GetClients(context.Background(), &pb.GetClientsRequest{
+		Ids: []string{" "},
+	})
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
-
 }
