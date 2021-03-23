@@ -80,9 +80,7 @@ func run(c *cli.Context) error {
 
 	//panic("fazer com que o programa só finalize ao receber um sinal os.INTERRUPT")
 	<-ch
-	os.Exit(0)
 	
-
 	grpcServer.GracefulStop()
 	log.Warn().Msg("shutting down")
 	return nil
